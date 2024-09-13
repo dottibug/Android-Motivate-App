@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">Motivate Me</string>
+    <string name="happyContentDescription">A smiley face icon</string>
+    <string name="placeholderMessage">Say Hello</string>
+    <string name="hint">Enter your name</string>
+    <string name="btnText">Update</string>
+    <string name="message">Hello, %1$s. %2$s</string>
+</resources>
