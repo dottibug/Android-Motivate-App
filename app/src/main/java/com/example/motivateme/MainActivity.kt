@@ -1,52 +1,49 @@
 package com.example.motivateme
 
 import android.content.Context
-import android.content.res.Resources
 import android.os.Bundle
 import android.view.inputmethod.InputMethodManager
-import android.widget.Button
-import android.widget.EditText
-import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.motivateme.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
-    private lateinit var nameView : EditText;
-    private lateinit var messageView : TextView;
-    private lateinit var res : Resources;
+    // Initialize binding object
+    private lateinit var binding : ActivityMainBinding;
+    private lateinit var imm : InputMethodManager;
 
     // Override lifecycle onCreate to initialize important items for the code
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        // Layout inflation
-        setContentView(R.layout.activity_main)
+
+        // Layout inflation (with view binding)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root) // set root of layout as content view
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
 
-        // Define private references
-        nameView = findViewById(R.id.mainEditTextName);
-        messageView = findViewById(R.id.mainTextViewMessage);
-        res = resources;
+        // Initialize imm
+        imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager;
 
-        // Button reference and click listener
-        // Kotlin: val is a constant variable; var is a mutable variable
-        val updateButton : Button = findViewById(R.id.mainBtnUpdate);
-
-        updateButton.setOnClickListener {
+        // Click listener
+        binding.mainBtnUpdate.setOnClickListener {
             val name = getName();
-            displayMessage(name);
+            if (name == "") return@setOnClickListener
+            else displayMessage(name);
         }
 
         // Check if a bundle is present
         if (savedInstanceState != null) {
             // Get data from bundle
-            messageView.text = savedInstanceState.getString("message");
+            binding.mainTextViewMessage.text = savedInstanceState.getString("message");
         }
     }
 
@@ -55,23 +52,22 @@ class MainActivity : AppCompatActivity() {
         super.onSaveInstanceState(outState)
 
         // Put data into bundle
-        outState.putString("message", messageView.text.toString());
+        outState.putString("message", binding.mainTextViewMessage.text.toString());
     }
 
     // Get name from EditText
     private fun getName(): String {
-        val name = nameView.text.toString();
-
-        // Return "User" as the default value if name is empty (returns name otherwise)
-        return name.trim().ifEmpty {
-            "User";
+        val name = binding.mainEditTextName.text.toString().trim();
+        return name.ifEmpty {
+            Toast.makeText(this, "Please enter your name.", Toast.LENGTH_SHORT).show();
+            return ""
         }
     }
 
     // Display personalized message
     private fun displayMessage(name : String) {
         val message = getRandomMessage();
-        messageView.text = String.format(res.getString(R.string.message), name, message);
+        binding.mainTextViewMessage.text = String.format(resources.getString(R.string.message), name, message);
         hideKeyboard();
     }
 
@@ -99,9 +95,6 @@ class MainActivity : AppCompatActivity() {
 
     // Hide keyboard using an Input Method Manager
     private fun hideKeyboard() {
-        // Get service from context and cast as InputMethodManager type
-        val inputManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager;
-        // All views have access to the current windowToken; here, we are using nameView, but any of the views would work
-        inputManager.hideSoftInputFromWindow(nameView.windowToken, 0);
+        imm.hideSoftInputFromWindow(binding.mainEditTextName.windowToken, 0);
     }
 }
