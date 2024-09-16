@@ -42,6 +42,20 @@ class MainActivity : AppCompatActivity() {
             val name = getName();
             displayMessage(name);
         }
+
+        // Check if a bundle is present
+        if (savedInstanceState != null) {
+            // Get data from bundle
+            messageView.text = savedInstanceState.getString("message");
+        }
+    }
+
+    // Override lifecycle onSavedInstanceState to save data on screen rotation
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+
+        // Put data into bundle
+        outState.putString("message", messageView.text.toString());
     }
 
     // Get name from EditText
